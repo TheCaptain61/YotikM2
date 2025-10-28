@@ -84,7 +84,7 @@ namespace Pins {
   constexpr uint8_t DOOR_SENSOR = 12;
   
   // Дисплей
-  constexpr uint8_t TM1637_CLK = 13;
+  constexpr uint8_t TM1637_CLK = 15;
   constexpr uint8_t TM1637_DIO = 14;
   
   // LED матрица

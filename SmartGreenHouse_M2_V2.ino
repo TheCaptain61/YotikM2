@@ -44,8 +44,8 @@ void setup() {
   eepromManager.begin();
   if (!eepromManager.loadSettings(systemSettings)) {
     Serial.println("Using default settings");
-    strcpy(systemSettings.wifiSSID, "GreenHouse");
-    strcpy(systemSettings.wifiPassword, "password");
+    strcpy(systemSettings.wifiSSID, "PATT");
+    strcpy(systemSettings.wifiPassword, "89396A1F61");
   }
   
   // Инициализация дисплея
