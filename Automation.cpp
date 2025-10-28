@@ -1,9 +1,8 @@
 #include "Automation.h"
 #include "DeviceManager.h"
-#include "ConfigManager.h"
+#include "Config.h"
 
-extern DeviceManager deviceManager;
-extern ConfigManager configManager;
+
 
 void Automation::updateTemperatureControl() {
     SensorData data = deviceManager.getSensorData();

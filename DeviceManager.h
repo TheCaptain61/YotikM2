@@ -1,12 +1,14 @@
+
+
 #ifndef DEVICE_MANAGER_H
 #define DEVICE_MANAGER_H
 
 #include <Arduino.h>
 #include <Wire.h>
+#include <TM1637.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include <BH1750.h>
-#include <TM1637.h>
 #include <FastLED.h>
 #include <ESP32Servo.h>
 #include "Config.h"
