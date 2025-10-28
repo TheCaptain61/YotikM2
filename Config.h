@@ -23,28 +23,16 @@ struct SystemSettings {
 };
 
 struct SensorData {
-  // Воздух
   float airTemperature = NAN;
   float airHumidity = NAN;
-  float pressure = NAN;
-  
-  // Почва
-  float soilTemperature = NAN;
   float soilMoisture = NAN;
-  
-  // Свет
+  float soilTemperature = NAN;
   float lightLevel = NAN;
   
-  // Состояния устройств
   bool pumpState = false;
   bool fanState = false;
-  bool heaterState = false;
-  bool lightState = false;
+  bool lightState = false;  // УДАЛЕН heaterState
   bool doorState = false;
-  
-  // Статус системы
-  bool systemHealthy = true;
-  String lastError = "";
 };
 
 struct DeviceConfig {
@@ -74,7 +62,6 @@ namespace Pins {
   // Управление
   constexpr uint8_t PUMP = 17;
   constexpr uint8_t FAN = 16;
-  constexpr uint8_t HEATER = 4;
   constexpr uint8_t LIGHT = 5;
   constexpr uint8_t DOOR_LOCK = 15;
   

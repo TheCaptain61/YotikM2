@@ -13,7 +13,6 @@ public:
     
     void controlPump(bool state, unsigned long duration = 0);
     void controlFan(bool state);
-    void controlHeater(bool state);
     void controlLight(bool state);
     void controlDoor(bool angle);
     void stopAllDevices();

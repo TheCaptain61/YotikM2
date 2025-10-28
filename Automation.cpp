@@ -20,6 +20,23 @@ void Automation::controlTemperature(const SensorData& data, const SystemSettings
     float hysteresis = 1.0;
     
     if (temp > setpoint + hysteresis) {
+        // Слишком жарко - включаем вентилятор
+        devices.controlFan(true);
+    } else if (temp < setpoint - hysteresis) {
+        // Слишком холодно - выключаем вентилятор
+        devices.controlFan(false);
+        // Обогревателя нет, поэтому просто выключаем вентилятор
+    } else {
+        // В норме - выключаем вентилятор
+        devices.controlFan(false);
+    }
+}
+    
+    float temp = data.airTemperature;
+    float setpoint = settings.tempSetpoint;
+    float hysteresis = 1.0;
+    
+    if (temp > setpoint + hysteresis) {
         // Too hot - turn on fan, turn off heater
         devices.controlFan(true);
         devices.controlHeater(false);

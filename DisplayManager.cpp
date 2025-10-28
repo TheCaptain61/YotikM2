@@ -172,8 +172,6 @@ void DisplayManager::showHumidity(float hum) {
 }
 
 void DisplayManager::showMessage(const String& message) {
-    Serial.println("📟 Display message: " + message);
-    
     if (message.length() == 4) {
         uint8_t segments[4];
         for (int i = 0; i < 4; i++) {
@@ -182,7 +180,14 @@ void DisplayManager::showMessage(const String& message) {
         }
         display.setSegments(segments);
     } else {
-        showNumber(message.toInt());
+        // Для более коротких сообщений
+        display.clear();
+        for (int i = 0; i < message.length() && i < 4; i++) {
+            uint8_t segments[4] = {0};
+            segments[i] = display.encodeDigit(message.charAt(i));
+            display.setSegments(segments);
+            delay(200); // Добавляем задержку между символами
+        }
     }
 }
 

@@ -274,260 +274,68 @@ void WebInterface::sendHTMLResponse(int code, const String& html) {
 String WebInterface::getSystemHTML() {
     String html = R"=====(
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Greenhouse M2</title>
-    <link rel="stylesheet" href="/style.css">
+    <title>Greenhouse</title>
+    <style>
+        body{font-family:Arial;margin:20px;background:#f0f0f0;}
+        .card{background:white;padding:15px;margin:10px 0;border-radius:5px;}
+        button{padding:8px 12px;margin:2px;border:none;border-radius:3px;}
+        .btn-on{background:#4CAF50;color:white;}
+        .btn-off{background:#f44336;color:white;}
+        .btn-neutral{background:#2196F3;color:white;}
+        .sensor-value{font-weight:bold;color:#333;}
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Smart Greenhouse M2</h1>
-        <p><strong>IP:</strong> )=====";
-    html += WiFi.localIP().toString();
-    html += R"=====(</p>
-        
-        <div class="grid">
-            <!-- Sensor Data -->
-            <div class="card">
-                <h2>Sensor Data</h2>
-                <div id="sensorData">
-                    <p>Loading...</p>
-                </div>
-                <button onclick="refreshData()">Refresh</button>
-                <button onclick="location.reload()">Reload Page</button>
-            </div>
-            
-            <!-- Device Control -->
-            <div class="card">
-                <h2>Manual Control</h2>
-                <div class="control">
-                    <button class="btn-on" onclick="controlDevice('pump', true)">Pump ON</button>
-                    <button class="btn-off" onclick="controlDevice('pump', false)">Pump OFF</button>
-                </div>
-                <div class="control">
-                    <button class="btn-on" onclick="controlDevice('fan', true)">Fan ON</button>
-                    <button class="btn-off" onclick="controlDevice('fan', false)">Fan OFF</button>
-                </div>
-                <div class="control">
-                    <button class="btn-on" onclick="controlDevice('heater', true)">Heater ON</button>
-                    <button class="btn-off" onclick="controlDevice('heater', false)">Heater OFF</button>
-                </div>
-                <div class="control">
-                    <button class="btn-on" onclick="controlDevice('light', true)">Light ON</button>
-                    <button class="btn-off" onclick="controlDevice('light', false)">Light OFF</button>
-                </div>
-                <div class="control">
-                    <button class="btn-neutral" onclick="controlDevice('door', 0)">Open Door</button>
-                    <button class="btn-neutral" onclick="controlDevice('door', 90)">Close Door</button>
-                </div>
-            </div>
-            
-            <!-- Settings -->
-            <div class="card">
-                <h2>Settings</h2>
-                <form id="settingsForm">
-                    <div class="form-group">
-                        <label>Temperature Setpoint (C):</label>
-                        <input type="number" step="0.1" id="tempSetpoint" min="10" max="40" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Humidity Setpoint (%):</label>
-                        <input type="number" step="0.1" id="humSetpoint" min="20" max="90" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Soil Moisture Setpoint (%):</label>
-                        <input type="number" step="0.1" id="soilMoistureSetpoint" min="10" max="90" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Light ON Hour:</label>
-                        <input type="number" id="lightOnHour" min="0" max="23" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Light OFF Hour:</label>
-                        <input type="number" id="lightOffHour" min="0" max="23" required>
-                    </div>
-                    <div class="form-group">
-                        <label><input type="checkbox" id="automationEnabled"> Automation Enabled</label>
-                    </div>
-                    <button type="submit">Save Settings</button>
-                </form>
-            </div>
-            
-            <!-- System Info -->
-            <div class="card">
-                <h2>System Information</h2>
-                <div id="systemInfo">
-                    <p>Loading...</p>
-                </div>
-                <div class="control">
-                    <button class="btn-neutral" onclick="calibrate('air')">Calibrate Air</button>
-                    <button class="btn-neutral" onclick="calibrate('water')">Calibrate Water</button>
-                    <button class="btn-neutral" onclick="resetSettings('settings')">Reset Settings</button>
-                </div>
-            </div>
-        </div>
+    <h1>Smart Greenhouse</h1>
+    
+    <div class="card">
+        <h3>Sensors</h3>
+        <div id="sensorData">Loading...</div>
+        <button onclick="refreshData()">Refresh</button>
+    </div>
+    
+    <div class="card">
+        <h3>Control</h3>
+        <button class="btn-on" onclick="controlDevice('pump', true)">Pump ON</button>
+        <button class="btn-off" onclick="controlDevice('pump', false)">Pump OFF</button>
+        <br>
+        <button class="btn-on" onclick="controlDevice('fan', true)">Fan ON</button>
+        <button class="btn-off" onclick="controlDevice('fan', false)">Fan OFF</button>
+        <br>
+        <button class="btn-on" onclick="controlDevice('light', true)">Light ON</button>
+        <button class="btn-off" onclick="controlDevice('light', false)">Light OFF</button>
+        <br>
+        <!-- ИСПРАВЛЕННЫЕ КНОПКИ ДВЕРИ -->
+        <button class="btn-neutral" onclick="controlDevice('door', 0)">Open Door</button>
+        <button class="btn-neutral" onclick="controlDevice('door', 90)">Close Door</button>
+        <button class="btn-neutral" onclick="controlDevice('door', 180)">Ventilation</button>
     </div>
 
     <script>
-        function refreshData() {
-            console.log('Refreshing data...');
-            fetch('/api/sensors')
-                .then(function(r) { 
-                    if (!r.ok) throw new Error('Network error: ' + r.status);
-                    return r.json(); 
-                })
-                .then(function(data) {
-                    console.log('Sensor data:', data);
-                    var html = '';
-                    if (data.airTemperature !== undefined) {
-                        html += '<p>Air Temp: <span class="sensor-value">' + data.airTemperature.toFixed(1) + 'C</span></p>';
-                    }
-                    if (data.airHumidity !== undefined) {
-                        html += '<p>Air Humidity: <span class="sensor-value">' + data.airHumidity.toFixed(1) + '%</span></p>';
-                    }
-                    if (data.soilTemperature !== undefined) {
-                        html += '<p>Soil Temp: <span class="sensor-value">' + data.soilTemperature.toFixed(1) + 'C</span></p>';
-                    }
-                    if (data.soilMoisture !== undefined) {
-                        html += '<p>Soil Moisture: <span class="sensor-value">' + data.soilMoisture.toFixed(1) + '%</span></p>';
-                    }
-                    if (data.lightLevel !== undefined) {
-                        html += '<p>Light Level: <span class="sensor-value">' + data.lightLevel.toFixed(0) + ' lux</span></p>';
-                    }
-                    document.getElementById('sensorData').innerHTML = html;
-                })
-                .catch(function(error) {
-                    console.error('Error:', error);
-                    document.getElementById('sensorData').innerHTML = '<p style="color: red;">Error loading data: ' + error.message + '</p>';
-                });
-                
-            fetch('/api/system')
-                .then(function(r) { 
-                    if (!r.ok) throw new Error('Network error: ' + r.status);
-                    return r.json(); 
-                })
-                .then(function(data) {
-                    var html = '<p>System: <span class="device-status ' + (data.systemHealthy ? 'healthy' : 'unhealthy') + '">' + (data.systemHealthy ? 'HEALTHY' : 'ERROR') + '</span></p>';
-                    html += '<p>BME280: <span class="device-status ' + (data.bme280Healthy ? 'healthy' : 'unhealthy') + '">' + (data.bme280Healthy ? 'OK' : 'ERROR') + '</span></p>';
-                    html += '<p>BH1750: <span class="device-status ' + (data.bh1750Healthy ? 'healthy' : 'unhealthy') + '">' + (data.bh1750Healthy ? 'OK' : 'ERROR') + '</span></p>';
-                    html += '<p>Soil Sensors: <span class="device-status ' + (data.soilSensorsHealthy ? 'healthy' : 'unhealthy') + '">' + (data.soilSensorsHealthy ? 'OK' : 'ERROR') + '</span></p>';
-                    document.getElementById('systemInfo').innerHTML = html;
-                })
-                .catch(function(error) {
-                    console.error('Error:', error);
-                    document.getElementById('systemInfo').innerHTML = '<p style="color: red;">Error loading system info</p>';
-                });
-        }
-        
-        function controlDevice(device, state) {
-            console.log('Controlling:', device, state);
-            fetch('/api/control', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({device: device, state: state})
-            })
-            .then(function(r) { 
-                if (!r.ok) throw new Error('Network error: ' + r.status);
-                return r.json(); 
-            })
-            .then(function(data) {
-                alert(data.message);
-                refreshData();
-            })
-            .catch(function(error) {
-                console.error('Error:', error);
-                alert('Control failed: ' + error.message);
+        function refreshData(){
+            fetch('/api/sensors').then(r=>r.json()).then(data=>{
+                let html='';
+                if(data.airTemperature) html+='<p>Air: '+data.airTemperature.toFixed(1)+'C</p>';
+                if(data.airHumidity) html+='<p>Humidity: '+data.airHumidity.toFixed(1)+'%</p>';
+                if(data.soilMoisture) html+='<p>Soil: '+data.soilMoisture.toFixed(1)+'%</p>';
+                document.getElementById('sensorData').innerHTML=html;
             });
         }
         
-        function calibrate(type) {
-            fetch('/api/calibrate?type=' + type, {method: 'POST'})
-                .then(function(r) { 
-                    if (!r.ok) throw new Error('Network error: ' + r.status);
-                    return r.json(); 
-                })
-                .then(function(data) { 
-                    alert(data.message); 
-                })
-                .catch(function(error) {
-                    alert('Calibration failed: ' + error.message);
-                });
+        function controlDevice(device, state){
+            fetch('/api/control',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({device:device, state:state})
+            }).then(r=>r.json()).then(data=>alert(data.message));
         }
         
-        function resetSettings(type) {
-            if (confirm('Are you sure you want to reset ' + type + '?')) {
-                fetch('/api/reset?type=' + type, {method: 'POST'})
-                    .then(function(r) { 
-                        if (!r.ok) throw new Error('Network error: ' + r.status);
-                        return r.json(); 
-                    })
-                    .then(function(data) { 
-                        alert(data.message);
-                        loadSettings();
-                    })
-                    .catch(function(error) {
-                        alert('Reset failed: ' + error.message);
-                    });
-            }
-        }
-        
-        function loadSettings() {
-            fetch('/api/settings')
-                .then(function(r) { 
-                    if (!r.ok) throw new Error('Network error: ' + r.status);
-                    return r.json(); 
-                })
-                .then(function(data) {
-                    document.getElementById('tempSetpoint').value = data.tempSetpoint;
-                    document.getElementById('humSetpoint').value = data.humSetpoint;
-                    document.getElementById('soilMoistureSetpoint').value = data.soilMoistureSetpoint;
-                    document.getElementById('lightOnHour').value = data.lightOnHour;
-                    document.getElementById('lightOffHour').value = data.lightOffHour;
-                    document.getElementById('automationEnabled').checked = data.automationEnabled;
-                })
-                .catch(function(error) {
-                    console.error('Error loading settings:', error);
-                });
-        }
-        
-        document.getElementById('settingsForm').onsubmit = function(e) {
-            e.preventDefault();
-            var settings = {
-                tempSetpoint: parseFloat(document.getElementById('tempSetpoint').value),
-                humSetpoint: parseFloat(document.getElementById('humSetpoint').value),
-                soilMoistureSetpoint: parseFloat(document.getElementById('soilMoistureSetpoint').value),
-                lightOnHour: parseInt(document.getElementById('lightOnHour').value),
-                lightOffHour: parseInt(document.getElementById('lightOffHour').value),
-                automationEnabled: document.getElementById('automationEnabled').checked
-            };
-            
-            fetch('/api/settings', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(settings)
-            })
-            .then(function(r) { 
-                if (!r.ok) throw new Error('Network error: ' + r.status);
-                return r.json(); 
-            })
-            .then(function(data) {
-                alert(data.message);
-            })
-            .catch(function(error) {
-                alert('Save failed: ' + error.message);
-            });
-        };
-        
-        // Auto-refresh every 10 seconds
-        setInterval(refreshData, 10000);
-        
-        // Initial load
+        setInterval(refreshData,5000);
         refreshData();
-        loadSettings();
-        
-        console.log('Smart Greenhouse interface loaded');
     </script>
 </body>
 </html>
@@ -593,11 +401,12 @@ String WebInterface::getSystemInfoJSON() {
 }
 
 bool WebInterface::validateControlCommand(const String& device, bool state) {
-    if (device == "pump" || device == "fan" || device == "heater" || device == "light") {
+    if (device == "pump" || device == "fan" || device == "light") {
         return true;
     }
     if (device == "door") {
-        return (state == 0 || state == 90);
+        // Для двери разрешаем углы 0, 90, 180
+        return (state == 0 || state == 90 || state == 180);
     }
     return false;
 }
@@ -607,11 +416,10 @@ void WebInterface::applyControlCommand(const String& device, bool state) {
         deviceManager.controlPump(state);
     } else if (device == "fan") {
         deviceManager.controlFan(state);
-    } else if (device == "heater") {
-        deviceManager.controlHeater(state);
     } else if (device == "light") {
         deviceManager.controlLight(state);
     } else if (device == "door") {
-        deviceManager.controlDoor(state ? 90 : 0);
+        // Для двери state - это угол (0, 90, 180)
+        deviceManager.controlDoor(state);
     }
 }
