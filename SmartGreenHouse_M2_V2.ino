@@ -15,9 +15,7 @@
 #include <FastLED.h>
 #include <ESP32Servo.h>
 
-// Config должен быть первым
-#include "Config.h"
-// Затем GlobalInstances
+// ТОЛЬКО GlobalInstances.h - он включит все остальное
 #include "GlobalInstances.h"
 
 WebServer server(80);
@@ -42,17 +40,6 @@ void setup() {
   
   Serial.println("\n\nSMART GREENHOUSE M2 - INITIALIZATION");
   
-  // Тест чисел
-  for (int i = 0; i <= 100; i += 20) {
-    char buffer[5];
-    sprintf(buffer, "%4d", i);
-    displayManager.showMessage(buffer);
-    delay(300);
-  }
-  
-  displayManager.clear();
-  Serial.println("✅ Display test complete");
-  
   // Инициализация EEPROM и загрузка настроек
   eepromManager.begin();
   if (!eepromManager.loadSettings(systemSettings)) {
@@ -60,6 +47,9 @@ void setup() {
     strcpy(systemSettings.wifiSSID, "GreenHouse");
     strcpy(systemSettings.wifiPassword, "password");
   }
+  
+  // Инициализация дисплея
+  displayManager.begin();
   
   // Инициализация устройств
   deviceManager.begin();
@@ -70,13 +60,10 @@ void setup() {
   // Инициализация веб-сервера
   webInterface.begin(server);
   
-  Serial.println("✅ SYSTEM INITIALIZATION COMPLETE");
+  Serial.println("SYSTEM INITIALIZATION COMPLETE");
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("📡 IP: " + WiFi.localIP().toString());
+    Serial.println("IP: " + WiFi.localIP().toString());
   }
-  
-  displayManager.showMessage("DONE");
-  delay(1000);
 }
 
 void loop() {
@@ -87,10 +74,17 @@ void loop() {
   // Чтение датчиков
   if (currentMillis - previousSensorRead >= SENSOR_READ_INTERVAL) {
     previousSensorRead = currentMillis;
-    deviceManager.readAllSensors();   
+    deviceManager.readAllSensors();
+    
     if (systemSettings.automationEnabled) {
       automation.process(sensorData, systemSettings, deviceManager);
     }
+    
+    // Логирование данных
+    Serial.println("SYSTEM STATUS");
+    Serial.printf("Air: %.1fC %.1f%%\n", sensorData.airTemperature, sensorData.airHumidity);
+    Serial.printf("Soil: %.1fC %.1f%%\n", sensorData.soilTemperature, sensorData.soilMoisture);
+    Serial.printf("Light: %.0f lux\n", sensorData.lightLevel);
   }
   
   // Обновление дисплея
@@ -107,7 +101,7 @@ void loop() {
 }
 
 void setupWiFi() {
-  Serial.print("📡 Connecting to ");
+  Serial.print("Connecting to ");
   Serial.println(systemSettings.wifiSSID);
   
   WiFi.begin(systemSettings.wifiSSID, systemSettings.wifiPassword);
@@ -120,10 +114,10 @@ void setupWiFi() {
   }
   
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("\n✅ Connected! IP: " + WiFi.localIP().toString());
+    Serial.println("\nConnected! IP: " + WiFi.localIP().toString());
   } else {
-    Serial.println("\n🔄 Starting AP mode...");
+    Serial.println("\nStarting AP mode...");
     WiFi.softAP("SmartGreenhouse-M2", "12345678");
-    Serial.println("📶 AP IP: " + WiFi.softAPIP().toString());
+    Serial.println("AP IP: " + WiFi.softAPIP().toString());
   }
 }

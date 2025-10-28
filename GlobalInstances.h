@@ -1,8 +1,7 @@
 #ifndef GLOBAL_INSTANCES_H
 #define GLOBAL_INSTANCES_H
 
-// Включаем ВСЕ заголовочные файлы для полных определений
-#include "Config.h"
+// Включаем все заголовочные файлы для полных определений
 #include "DeviceManager.h"
 #include "DisplayManager.h"
 #include "EEPROMManager.h"

@@ -5,26 +5,35 @@
 #include <ArduinoJson.h>
 #include "Config.h"
 
+// Forward declarations
+class DeviceManager;
+extern DeviceManager deviceManager;
+
 class WebInterface {
 public:
-    WebInterface();
-    void begin();
-    void handleClient();
+    void begin(WebServer& server);
     
-private:
-    WebServer server;
-    
-    void setupRoutes();
+    // API endpoints
     void handleRoot();
     void handleSensorData();
-    void handleSystemInfo();
-    void handleGetSettings();
-    void handlePostSettings();
+    void handleSettings();
     void handleControl();
-    void handleNotFound();
+    void handleSystemInfo();
+    void handleCalibrate();
+    void handleReset();
     
+private:
+    WebServer* server;
+    
+    void sendJSONResponse(int code, const String& message, const String& jsonData = "");
+    void sendHTMLResponse(int code, const String& html);
+    String getSystemHTML();
     String getSensorDataJSON();
+    String getSettingsJSON();
     String getSystemInfoJSON();
+    bool validateControlCommand(const String& device, bool state);
+    void applyControlCommand(const String& device, bool state);
 };
+
 
 #endif

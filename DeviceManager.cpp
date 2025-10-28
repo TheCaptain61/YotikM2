@@ -1,14 +1,10 @@
-
-
 #include "DeviceManager.h"
 #include <Wire.h>
-#include <TM1637Display.h>
 #include <BH1750.h>
 #include <Adafruit_BME280.h>
 #include <ESP32Servo.h>
 #include <FastLED.h>
 #include "GlobalInstances.h"
-
 
 // Драйверы устройств
 BH1750 lightMeter;
@@ -54,8 +50,8 @@ void DeviceManager::initializePins() {
     Serial.println("📌 Initializing GPIO pins...");
     
     // Настройка пинов реле
-    int relayPins[] = {Pins::PUMP, Pins::FAN, Pins::LIGHT, Pins::DOOR_LOCK};
-    const char* relayNames[] = {"PUMP", "FAN", "LIGHT", "DOOR_LOCK"};
+    int relayPins[] = {Pins::PUMP, Pins::FAN, Pins::HEATER, Pins::LIGHT, Pins::DOOR_LOCK};
+    const char* relayNames[] = {"PUMP", "FAN", "HEATER", "LIGHT", "DOOR_LOCK"};
     
     for(int i = 0; i < 5; i++) {
         pinMode(relayPins[i], OUTPUT);
@@ -436,6 +432,11 @@ void DeviceManager::controlFan(bool state) {
     Serial.println(state ? "🌬️ Fan ON" : "🌬️ Fan OFF");
 }
 
+void DeviceManager::controlHeater(bool state) {
+    digitalWrite(Pins::HEATER, state ? HIGH : LOW);
+    sensorData.heaterState = state;
+    Serial.println(state ? "🔥 Heater ON" : "🔥 Heater OFF");
+}
 
 void DeviceManager::controlLight(bool state) {
     digitalWrite(Pins::LIGHT, state ? HIGH : LOW);
@@ -462,6 +463,7 @@ void DeviceManager::controlDoor(bool angle) {
 void DeviceManager::stopAllDevices() {
     controlPump(false);
     controlFan(false);
+    controlHeater(false);
     controlLight(false);
     Serial.println("🔴 All devices stopped");
 }

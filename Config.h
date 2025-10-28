@@ -3,84 +3,109 @@
 
 #include <Arduino.h>
 
-// Структура для хранения данных с датчиков
+// Версия конфигурации для миграции EEPROM
+#define CONFIG_VERSION 3
+#define EEPROM_SIZE 512
+
+// ===== Структуры для хранения данных =====
+struct SystemSettings {
+  uint8_t version = CONFIG_VERSION;
+  char wifiSSID[32] = "";
+  char wifiPassword[32] = "";
+  float tempSetpoint = 25.0;
+  float humSetpoint = 60.0;
+  float soilMoistureSetpoint = 50.0;
+  int lightOnHour = 8;
+  int lightOffHour = 20;
+  bool automationEnabled = true;
+  uint8_t displayBrightness = 7;
+  bool use24HourFormat = true;
+};
+
 struct SensorData {
-    float airTemperature = 0.0;
-    float airHumidity = 0.0;
-    float pressure = 0.0;
-    float lightLevel = 0.0;
-    float soilMoisture = 0.0;
-    float soilTemperature = 0.0;
-    bool heaterState = false;
-    bool lightState = false;
-    bool ventilationState = false;
-    bool waterPumpState = false;
-    bool systemHealthy = false;
-    String errorMessage = "";
-    unsigned long lastUpdate = 0;
+  // Воздух
+  float airTemperature = NAN;
+  float airHumidity = NAN;
+  float pressure = NAN;
+  
+  // Почва
+  float soilTemperature = NAN;
+  float soilMoisture = NAN;
+  
+  // Свет
+  float lightLevel = NAN;
+  
+  // Состояния устройств
+  bool pumpState = false;
+  bool fanState = false;
+  bool heaterState = false;
+  bool lightState = false;
+  bool doorState = false;
+  
+  // Статус системы
+  bool systemHealthy = true;
+  String lastError = "";
 };
 
-// Структура для хранения настроек устройства
-struct DeviceSettings {
-    // Температура
-    float tempSetpoint = 25.0;
-    float tempHysteresis = 1.0;
-    
-    // Освещение
-    float lightThreshold = 100.0;
-    
-    // Вентиляция
-    float ventilationTemp = 30.0;
-    float ventilationHumidity = 80.0;
-    
-    // Полив
-    float soilMoistureThreshold = 40.0;
-    unsigned long wateringDuration = 5000;
-    
-    // Сеть
-    String wifiSSID = "";
-    String wifiPassword = "";
-    String deviceName = "SmartGreenhouse";
-    
-    // Интервалы обновления
-    unsigned long sensorReadInterval = 5000;
-    unsigned long controlUpdateInterval = 2000;
+struct DeviceConfig {
+  // Адреса I2C устройств
+  uint8_t bme280Address = 0;
+  uint8_t bh1750Address = 0;
+  
+  // Флаги наличия устройств
+  bool hasBME280 = false;
+  bool hasBH1750 = false;
+  bool hasTM1637 = true;
+  bool hasSoilSensors = false;
+  bool hasRelays = true;
+  
+  // Калибровочные значения
+  float soilAirValue = 2800.0;
+  float soilWaterValue = 1200.0;
+  
+  // Статусы устройств
+  bool bme280Healthy = false;
+  bool bh1750Healthy = false;
+  bool soilSensorsHealthy = false;
 };
 
-// Конфигурация пинов
-struct PinConfig {
-    // Датчики
-    int bme280SDA = 21;
-    int bme280SCL = 22;
-    int bh1750SDA = 21;
-    int bh1750SCL = 22;
-    int soilMoisturePin = 34;
-    int soilTempPin = 35;
-    
-    // Исполнительные устройства
-    int heaterPin = 4;
-    int lightPin = 5;
-    int ventilationPin = 6;
-    int waterPumpPin = 7;
-    int servoPin = 8;
-    
-    // Дисплей
-    int displayDIO = 13;
-    int displayCLK = 14;
-    
-    // Светодиодная лента
-    int ledPin = 11;
-    int numLeds = 16;
-};
+// ===== Конфигурация пинов для ESP32 =====
+namespace Pins {
+  // Управление
+  constexpr uint8_t PUMP = 17;
+  constexpr uint8_t FAN = 16;
+  constexpr uint8_t HEATER = 4;
+  constexpr uint8_t LIGHT = 5;
+  constexpr uint8_t DOOR_LOCK = 15;
+  
+  // Датчики
+  constexpr uint8_t SOIL_MOISTURE = 34;
+  constexpr uint8_t SOIL_TEMPERATURE = 35;
+  constexpr uint8_t DOOR_SENSOR = 12;
+  
+  // Дисплей
+  constexpr uint8_t TM1637_CLK = 13;
+  constexpr uint8_t TM1637_DIO = 14;
+  
+  // LED матрица
+  constexpr uint8_t LED_MATRIX = 18;
+  
+  // Сервомотор
+  constexpr uint8_t SERVO = 19;
+}
 
-// Конфигурация состояния устройств
-struct DeviceHealth {
-    bool bme280Healthy = false;
-    bool bh1750Healthy = false;
-    bool soilSensorHealthy = false;
-    bool displayHealthy = false;
-    bool ledStripHealthy = false;
-    bool lastUpdateSuccess = false;
-};
+// ===== Константы системы =====
+namespace Constants {
+  constexpr uint16_t NUM_LEDS = 64;
+  constexpr uint16_t SOIL_ADC_MAX = 4095;
+  constexpr float SOIL_TEMP_CONVERSION = 6.27;
+  constexpr unsigned long SERVO_DELAY = 1000;
+  constexpr unsigned long PUMP_DURATION = 5000;
+}
+
+// ===== Глобальные экземпляры =====
+extern SystemSettings systemSettings;
+extern SensorData sensorData;
+extern DeviceConfig deviceConfig;
 
 #endif

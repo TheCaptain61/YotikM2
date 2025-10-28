@@ -2,18 +2,21 @@
 #define AUTOMATION_H
 
 #include "Config.h"
+#include "DeviceManager.h"
 
 class Automation {
 public:
-    void updateTemperatureControl();
-    void updateLightControl();
-    void updateVentilationControl();
-    void updateWateringControl();
-    void updateAllSystems();
+    void process(const SensorData& data, const SystemSettings& settings, DeviceManager& devices);
     
 private:
-    unsigned long lastWateringTime = 0;
-    bool wateringInProgress = false;
+    void controlTemperature(const SensorData& data, const SystemSettings& settings, DeviceManager& devices);
+    void controlHumidity(const SensorData& data, const SystemSettings& settings, DeviceManager& devices);
+    void controlSoilMoisture(const SensorData& data, const SystemSettings& settings, DeviceManager& devices);
+    void controlLighting(const SensorData& data, const SystemSettings& settings, DeviceManager& devices);
+    void controlVentilation(const SensorData& data, const SystemSettings& settings, DeviceManager& devices);
+    
+    unsigned long lastPumpRun = 0;
+    const unsigned long PUMP_COOLDOWN = 300000; // 5 minutes
 };
 
 #endif
