@@ -1,0 +1,13 @@
+# Required Libraries for Smart Greenhouse M2
+# Install these libraries via Arduino Library Manager:
+
+ArduinoJson@6.21.3
+Adafruit BME280 Library@2.2.2
+BH1750@1.3.0
+TM1637@1.2.0
+FastLED@3.6.0
+NTPClient@3.2.1
+ESP32Servo@1.1.0
+
+# ESP32 Board Package:
+# esp32:esp32@3.3.2
