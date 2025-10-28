@@ -1,6 +1,6 @@
 #include "WebInterface.h"
 #include "DeviceManager.h"
-#include "ConfigManager.h"
+#include "Config.h"
 
 extern DeviceManager deviceManager;
 extern ConfigManager configManager;

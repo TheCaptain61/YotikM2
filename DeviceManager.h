@@ -5,7 +5,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <TM1637.h>
+#include <TM1637Display.h
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include <BH1750.h>
